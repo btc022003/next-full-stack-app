@@ -1,5 +1,5 @@
 import React from 'react';
-import PageContainer from '../_components/PageContainer';
+import PageContainer from '../../_components/PageContainer';
 
 function Dashboard() {
   return (
