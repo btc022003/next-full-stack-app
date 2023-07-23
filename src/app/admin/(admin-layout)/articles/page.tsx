@@ -1,6 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Button, Card, Form, Input, Table, Modal, Space } from 'antd';
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  Table,
+  Modal,
+  Space,
+  Popconfirm,
+} from 'antd';
 import {
   SearchOutlined,
   PlusOutlined,
@@ -8,12 +17,20 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons';
 
+type Article = {
+  id: string;
+  title: string;
+  desc: string;
+};
+
 function ArticlePage() {
   const [open, setOpen] = useState(false); // 控制modal显示隐藏
-  const [list, setList] = useState([]);
+  const [list, setList] = useState<Article[]>([]);
   const [myForm] = Form.useForm(); // 获取Form组件
 
   const [query, setQuery] = useState({});
+  const [currentId, setCurrentId] = useState(''); // 使用一个当前id变量，表示是新增还是修改
+  // 如果存在表示修改，不存在表示新增
 
   // 监听查询条件的改变
   useEffect(() => {
@@ -23,6 +40,12 @@ function ArticlePage() {
         setList(res.data.list);
       });
   }, [query]);
+
+  useEffect(() => {
+    if (!open) {
+      setCurrentId('');
+    }
+  }, [open]);
 
   return (
     <Card
@@ -67,16 +90,36 @@ function ArticlePage() {
           },
           {
             title: '操作',
-            render() {
+            render(v, r) {
               return (
                 <Space>
-                  <Button size='small' icon={<EditOutlined />} type='primary' />
                   <Button
                     size='small'
-                    icon={<DeleteOutlined />}
+                    icon={<EditOutlined />}
                     type='primary'
-                    danger
+                    onClick={() => {
+                      setOpen(true);
+                      setCurrentId(r.id);
+                      myForm.setFieldsValue(r);
+                    }}
                   />
+                  <Popconfirm
+                    title='是否确认删除?'
+                    onConfirm={async () => {
+                      //
+                      await fetch('/api/admin/articles/' + r.id, {
+                        method: 'DELETE',
+                      }).then((res) => res.json());
+                      setQuery({}); // 重制查询条件，重新获取数据
+                    }}
+                  >
+                    <Button
+                      size='small'
+                      icon={<DeleteOutlined />}
+                      type='primary'
+                      danger
+                    />
+                  </Popconfirm>
                 </Space>
               );
             },
@@ -87,19 +130,31 @@ function ArticlePage() {
         title='编辑'
         open={open}
         onCancel={() => setOpen(false)}
+        destroyOnClose={true} // 关闭窗口之后销毁
+        maskClosable={false} // 点击空白区域的时候不关闭
         onOk={() => {
           myForm.submit();
         }}
       >
         <Form
+          preserve={false} // 和modal结合使用的时候需要加上它，否则不会销毁
           layout='vertical'
           form={myForm}
           onFinish={async (v) => {
-            console.log(v);
-            await fetch('/api/admin/articles', {
-              method: 'POST',
-              body: JSON.stringify(v),
-            }).then((res) => res.json());
+            // console.log(v);
+            if (currentId) {
+              // 修改
+              await fetch('/api/admin/articles/' + currentId, {
+                body: JSON.stringify(v),
+                method: 'PUT',
+              }).then((res) => res.json());
+            } else {
+              await fetch('/api/admin/articles', {
+                method: 'POST',
+                body: JSON.stringify(v),
+              }).then((res) => res.json());
+            }
+
             // 此处需要调接口
             setOpen(false);
             setQuery({}); // 改变query会重新去取数据
