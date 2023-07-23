@@ -1,11 +1,28 @@
 import { prisma } from '@/db';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const GET = async () => {
+export const GET = async (req: NextRequest) => {
+  let per = (req.nextUrl.searchParams.get('per') as any) * 1 || 10;
+  let page = (req.nextUrl.searchParams.get('page') as any) * 1 || 1;
+  let title = (req.nextUrl.searchParams.get('title') as string) || '';
+
   const data = await prisma.article.findMany({
-    where: {},
+    where: {
+      title: {
+        contains: title, // 模糊查询
+      },
+    },
     orderBy: {
       createdAt: 'desc',
+    },
+    take: per, // 取多少条数据
+    skip: (page - 1) * per, // 跳过
+  });
+  const total = await prisma.article.count({
+    where: {
+      title: {
+        contains: title, // 模糊查询
+      },
     },
   });
   return NextResponse.json({
@@ -13,6 +30,8 @@ export const GET = async () => {
     errorMessage: '',
     data: {
       list: data,
+      pages: Math.ceil(total / per),
+      total,
     },
   });
 };

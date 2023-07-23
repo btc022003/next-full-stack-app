@@ -28,16 +28,24 @@ function ArticlePage() {
   const [list, setList] = useState<Article[]>([]);
   const [myForm] = Form.useForm(); // 获取Form组件
 
-  const [query, setQuery] = useState({});
+  const [query, setQuery] = useState({
+    per: 10,
+    page: 1,
+    title: '',
+  });
   const [currentId, setCurrentId] = useState(''); // 使用一个当前id变量，表示是新增还是修改
+  const [total, setTotal] = useState(0);
   // 如果存在表示修改，不存在表示新增
 
   // 监听查询条件的改变
   useEffect(() => {
-    fetch('/api/admin/articles')
+    fetch(
+      `/api/admin/articles?page=${query.page}&per=${query.per}&title=${query.title}`
+    )
       .then((res) => res.json())
       .then((res) => {
         setList(res.data.list);
+        setTotal(res.data.total);
       });
   }, [query]);
 
@@ -60,18 +68,37 @@ function ArticlePage() {
         </>
       }
     >
-      <Form layout='inline'>
-        <Form.Item label='标题'>
+      <Form
+        layout='inline'
+        onFinish={(v) => {
+          setQuery({
+            page: 1,
+            per: 10,
+            title: v.title,
+          });
+        }}
+      >
+        <Form.Item label='标题' name='title'>
           <Input placeholder='请输入关键词' />
         </Form.Item>
         <Form.Item>
-          <Button icon={<SearchOutlined />} type='primary' />
+          <Button icon={<SearchOutlined />} htmlType='submit' type='primary' />
         </Form.Item>
       </Form>
       <Table
         style={{ marginTop: '8px' }}
         dataSource={list}
         rowKey='id'
+        pagination={{
+          total,
+          onChange(page) {
+            setQuery({
+              ...query,
+              page,
+              per: 10,
+            });
+          },
+        }}
         columns={[
           {
             title: '序号',
@@ -110,7 +137,7 @@ function ArticlePage() {
                       await fetch('/api/admin/articles/' + r.id, {
                         method: 'DELETE',
                       }).then((res) => res.json());
-                      setQuery({}); // 重制查询条件，重新获取数据
+                      setQuery({ ...query, per: 10, page: 1 }); // 重制查询条件，重新获取数据
                     }}
                   >
                     <Button
@@ -157,7 +184,7 @@ function ArticlePage() {
 
             // 此处需要调接口
             setOpen(false);
-            setQuery({}); // 改变query会重新去取数据
+            setQuery({ ...query }); // 改变query会重新去取数据
           }}
         >
           <Form.Item
