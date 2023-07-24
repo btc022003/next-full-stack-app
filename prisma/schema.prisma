@@ -26,6 +26,7 @@ model Article {
   title     String
   desc      String?  @default("")
   content   String?  @default("")
+  image     String?  @default("")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

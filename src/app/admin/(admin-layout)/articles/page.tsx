@@ -16,6 +16,7 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from '@ant-design/icons';
+import MyUpload from '../../_components/MyUpload';
 
 type Article = {
   id: string;
@@ -27,6 +28,9 @@ function ArticlePage() {
   const [open, setOpen] = useState(false); // 控制modal显示隐藏
   const [list, setList] = useState<Article[]>([]);
   const [myForm] = Form.useForm(); // 获取Form组件
+
+  // 图片路径
+  const [imageUrl, setImageUrl] = useState<string>('');
 
   const [query, setQuery] = useState({
     per: 10,
@@ -52,6 +56,7 @@ function ArticlePage() {
   useEffect(() => {
     if (!open) {
       setCurrentId('');
+      setImageUrl('');
     }
   }, [open]);
 
@@ -112,6 +117,26 @@ function ArticlePage() {
             dataIndex: 'title',
           },
           {
+            title: '封面',
+            align: 'center',
+            width: '100px',
+            // dataIndex: 'title',
+            render(v, r) {
+              return (
+                <img
+                  src={r.image}
+                  style={{
+                    display: 'block',
+                    margin: '8px auto',
+                    width: '80px',
+                    maxHeight: '80px',
+                  }}
+                  alt={r.title}
+                />
+              );
+            },
+          },
+          {
             title: '简介',
             dataIndex: 'desc',
           },
@@ -127,6 +152,7 @@ function ArticlePage() {
                     onClick={() => {
                       setOpen(true);
                       setCurrentId(r.id);
+                      setImageUrl(r.image);
                       myForm.setFieldsValue(r);
                     }}
                   />
@@ -172,13 +198,13 @@ function ArticlePage() {
             if (currentId) {
               // 修改
               await fetch('/api/admin/articles/' + currentId, {
-                body: JSON.stringify(v),
+                body: JSON.stringify({ ...v, image: imageUrl }),
                 method: 'PUT',
               }).then((res) => res.json());
             } else {
               await fetch('/api/admin/articles', {
                 method: 'POST',
-                body: JSON.stringify(v),
+                body: JSON.stringify({ ...v, image: imageUrl }),
               }).then((res) => res.json());
             }
 
@@ -201,6 +227,9 @@ function ArticlePage() {
           </Form.Item>
           <Form.Item label='简介' name='desc'>
             <Input.TextArea placeholder='请输入简介' />
+          </Form.Item>
+          <Form.Item label='封面'>
+            <MyUpload imageUrl={imageUrl} setImageUrl={setImageUrl} />
           </Form.Item>
         </Form>
       </Modal>
