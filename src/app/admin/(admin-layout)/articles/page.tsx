@@ -17,11 +17,14 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons';
 import MyUpload from '../../_components/MyUpload';
+import MyEditor from '../../_components/MyEditor';
 
 type Article = {
   id: string;
   title: string;
   desc: string;
+  image: string;
+  content: string;
 };
 
 function ArticlePage() {
@@ -31,6 +34,8 @@ function ArticlePage() {
 
   // 图片路径
   const [imageUrl, setImageUrl] = useState<string>('');
+  // 编辑器内容
+  const [html, setHtml] = useState('');
 
   const [query, setQuery] = useState({
     per: 10,
@@ -57,6 +62,7 @@ function ArticlePage() {
     if (!open) {
       setCurrentId('');
       setImageUrl('');
+      setHtml('');
     }
   }, [open]);
 
@@ -153,6 +159,7 @@ function ArticlePage() {
                       setOpen(true);
                       setCurrentId(r.id);
                       setImageUrl(r.image);
+                      setHtml(r.content);
                       myForm.setFieldsValue(r);
                     }}
                   />
@@ -188,6 +195,7 @@ function ArticlePage() {
         onOk={() => {
           myForm.submit();
         }}
+        width={'75vw'}
       >
         <Form
           preserve={false} // 和modal结合使用的时候需要加上它，否则不会销毁
@@ -198,13 +206,13 @@ function ArticlePage() {
             if (currentId) {
               // 修改
               await fetch('/api/admin/articles/' + currentId, {
-                body: JSON.stringify({ ...v, image: imageUrl }),
+                body: JSON.stringify({ ...v, image: imageUrl, content: html }),
                 method: 'PUT',
               }).then((res) => res.json());
             } else {
               await fetch('/api/admin/articles', {
                 method: 'POST',
-                body: JSON.stringify({ ...v, image: imageUrl }),
+                body: JSON.stringify({ ...v, image: imageUrl, content: html }),
               }).then((res) => res.json());
             }
 
@@ -230,6 +238,9 @@ function ArticlePage() {
           </Form.Item>
           <Form.Item label='封面'>
             <MyUpload imageUrl={imageUrl} setImageUrl={setImageUrl} />
+          </Form.Item>
+          <Form.Item label='详情'>
+            <MyEditor html={html} setHtml={setHtml} />
           </Form.Item>
         </Form>
       </Modal>
