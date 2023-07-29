@@ -27,6 +27,12 @@ function MyEditor({ html, setHtml }: { html: string; setHtml: any }) {
     // TS 语法
     // const editorConfig = {                         // JS 语法
     placeholder: '请输入内容...',
+    MENU_CONF: {
+      uploadImage: {
+        server: '/api/common/wang_editor/upload',
+        fieldName: 'file',
+      },
+    },
   };
 
   // 及时销毁 editor ，重要！
