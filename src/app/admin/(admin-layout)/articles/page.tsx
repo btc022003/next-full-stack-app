@@ -16,8 +16,12 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from '@ant-design/icons';
+import dynamic from 'next/dynamic';
 import MyUpload from '../../_components/MyUpload';
-import MyEditor from '../../_components/MyEditor';
+// 只在客户端中引入富文本编辑器，不在编译的时候做处理
+const MyEditor = dynamic(() => import('../../_components/MyEditor'), {
+  ssr: false,
+});
 
 type Article = {
   id: string;
