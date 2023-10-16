@@ -11,6 +11,7 @@
   "dependencies": {
     "@prisma/client": "^4.15.0",
     "@types/node": "20.3.0",
+    "@ant-design/cssinjs": "^1.17.2",
     "@types/react": "18.2.11",
     "@types/react-dom": "18.2.4",
     "@wangeditor/editor": "^5.1.23",

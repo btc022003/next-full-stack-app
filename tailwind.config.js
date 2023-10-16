@@ -16,6 +16,8 @@ module.exports = {
   },
   plugins: [],
   corePlugins: {
-    preflight: false, // 禁止设置初始值
+    // 可以通过修改antd的cssinjs中的配置项目部分，解决
+    // https://ant-design.antgroup.com/docs/react/server-side-rendering-cn
+    // preflight: false, // 禁止设置初始值
   },
 };

@@ -6,7 +6,7 @@ function LoginPage() {
   const nav = useRouter();
   return (
     <div className='login-form pt-20'>
-      <Card title='Next全栈管理后台' className='w-4/5 mx-auto'>
+      <Card title='Next全栈管理后台' className='w-4/5 !mx-auto'>
         <Form
           labelCol={{ span: 3 }}
           onFinish={async (v) => {
